@@ -4,7 +4,7 @@ var querystring	= require('querystring');
 
 
 function LBCClient(key, secret, otp) {
-	var nonce = new Date() * 1000;
+	let nonce = new Date() * 1000;
 	var self = this;
 
 	var config = {
@@ -23,6 +23,7 @@ function LBCClient(key, secret, otp) {
 	 * @return {Object}            The request object
 	 */
 	function api(method, ad_id, params, callback) {
+		nonce = new Date() * 1000;
 		var methods = {
 			onlineAds: ['buy-bitcoins-online'],
 			public: ['countrycodes'],

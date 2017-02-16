@@ -1,6 +1,6 @@
-var request = require('request')
-var crypto		= require('crypto');
-var querystring	= require('querystring');
+const request = require('request')
+const crypto = require('crypto');
+const querystring = require('querystring');
 
 
 function LBCClient(key, secret, otp) {
@@ -34,7 +34,10 @@ function LBCClient(key, secret, otp) {
 			'wallet-send', 'wallet', 'contact_info'
 			]
 		};
-		if(methods.public.indexOf(method) !== -1) {
+		if(methods.onlineAds.indexOf(method) !== -1) {
+			return onlineAdsMethod(method, params, ad_id, callback);
+		}
+		else if(methods.public.indexOf(method) !== -1) {
 			return publicMethod(method, params, ad_id, callback);
 		}
 		else if(methods.private.indexOf(method) !== -1) {
@@ -43,6 +46,17 @@ function LBCClient(key, secret, otp) {
 		else {
 			throw new Error(method + ' is not a valid API method.');
 		}
+	}
+
+	/**
+	 * This method makes a onlineAds API request.
+	 */
+	function onlineAdsMethod(method, params, ad_id, callback) {
+		params = params || {}
+
+		var url = `https://localbitcoins.com/${method}/.json`;
+
+		return rawRequest(url, {}, params, method, callback);
 	}
 
 	/**
@@ -57,14 +71,14 @@ function LBCClient(key, secret, otp) {
 
 		var path;
 		if (ad_id) {
-			path	= '/' + method + '/' + ad_id;
+			path = '/' + method + '/' + ad_id;
 		} else {
-			path	= '/' + method;
+			path = '/' + method;
 		}
 
-		var url		= config.url + path;
+		var url = config.url + path;
 
-		return rawRequest(url, {}, params, callback);
+		return rawRequest(url, headers, params, method, callback);
 	}
 
 	/**
@@ -85,7 +99,7 @@ function LBCClient(key, secret, otp) {
 			path	= '/' + method;
 		}
 
-		var url		= config.url + path;
+		var url = config.url + path;
 
 		var signature = getMessageSignature(path, params, nonce);
 
@@ -139,69 +153,70 @@ function LBCClient(key, secret, otp) {
 				form: params,
 			};
 
-		var req = request.post(options, function(error, response, body) {
-			if(typeof callback === 'function') {
-				var data;
+			var req = request.post(options, function(error, response, body) {
+				if(typeof callback === 'function') {
+					var data;
 
-				if(error) {
-					callback.call(self, new Error('Error in server response: ' + JSON.stringify(error)), null);
-					return;
+					if(error) {
+						callback.call(self, new Error('Error in server response: ' + JSON.stringify(error)), null);
+						return;
+					}
+
+					try {
+						data = JSON.parse(body);
+					}
+					catch(e) {
+						callback.call(self, new Error('Could not understand response from server: ' + body), null);
+						return;
+					}
+
+					if(data.error && data.error.length) {
+						callback.call(self, data.error, null);
+					}
+					else {
+						callback.call(self, null, data);
+					}
 				}
+			});
 
-				try {
-					data = JSON.parse(body);
+			return req;
+
+		} else {
+
+			let options = {
+				url: url,
+				headers: headers,
+			};
+
+			let req = request.get(options, function(error, response, body) {
+
+				if(typeof callback === 'function') {
+					let data;
+
+					if(error) {
+						callback.call(self, new Error('Error in server response: ' + JSON.stringify(error)), null);
+						return;
+					}
+
+					try {
+						data = JSON.parse(body);
+					}
+					catch(e) {
+						callback.call(self, new Error('Could not understand response from server: ' + body), null);
+						return;
+					}
+
+					if(data.error && data.error.length) {
+						callback.call(self, data.error, null);
+					}
+					else {
+						callback.call(self, null, data);
+					}
 				}
-				catch(e) {
-					callback.call(self, new Error('Could not understand response from server: ' + body), null);
-					return;
-				}
+			});
 
-				if(data.error && data.error.length) {
-					callback.call(self, data.error, null);
-				}
-				else {
-					callback.call(self, null, data);
-				}
-			}
-		});
-
-		return req;
-
-	 } else {
-
-		var options = {
-			url: url + '/',
-			headers: headers,
-		};
-
-		var req = request.get(options, function(error, response, body) {
-			if(typeof callback === 'function') {
-				var data;
-
-				if(error) {
-					callback.call(self, new Error('Error in server response: ' + JSON.stringify(error)), null);
-					return;
-				}
-
-				try {
-					data = JSON.parse(body);
-				}
-				catch(e) {
-					callback.call(self, new Error('Could not understand response from server: ' + body), null);
-					return;
-				}
-
-				if(data.error && data.error.length) {
-					callback.call(self, data.error, null);
-				}
-				else {
-					callback.call(self, null, data);
-				}
-			}
-		});
-
-		return req;
-	}
+			return req;
+		}
 	}
 
 	self.api			= api;

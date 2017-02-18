@@ -25,7 +25,7 @@ function LBCClient(key, secret, otp) {
 	function api(method, ad_id, params, callback) {
 		nonce = new Date() * 1000;
 		var methods = {
-			onlineAds: ['buy-bitcoins-online'],
+			onlineAds: ['buy-bitcoins-online', 'sell-bitcoins-online'],
 			public: ['countrycodes'],
 			private: ['ad-get', 'ad-get/ad_id', 'myself', 'ads',
 			'dashboard', 'dashboard/released', 'dashboard/canceled', 'dashboard/closed',
@@ -54,7 +54,7 @@ function LBCClient(key, secret, otp) {
 	function onlineAdsMethod(method, params, ad_id, callback) {
 		params = params || {}
 
-		var url = `https://localbitcoins.com/${method}/.json`;
+		var url = `https://localbitcoins.com/${method}/${params.path}/.json`;
 
 		return rawRequest(url, {}, params, method, callback);
 	}

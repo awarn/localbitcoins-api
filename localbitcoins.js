@@ -170,7 +170,7 @@ function LBCClient(key, secret, otp) {
 						return;
 					}
 
-					if(data.error && data.error.length) {
+					if(data.error) {
 						callback.call(self, data.error, null);
 					}
 					else {
@@ -206,7 +206,7 @@ function LBCClient(key, secret, otp) {
 						return;
 					}
 
-					if(data.error && data.error.length) {
+					if(data.error) {
 						callback.call(self, data.error, null);
 					}
 					else {

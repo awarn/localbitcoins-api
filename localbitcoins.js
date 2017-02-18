@@ -24,16 +24,18 @@ function LBCClient(key, secret, otp) {
 	 */
 	function api(method, ad_id, params, callback) {
 		nonce = new Date() * 1000;
-		var methods = {
+		
+		let methods = {
 			onlineAds: ['buy-bitcoins-online', 'sell-bitcoins-online'],
 			public: ['countrycodes'],
-			private: ['ad-get', 'ad-get/ad_id', 'myself', 'ads',
+			private: ['ad-get', 'ad-get/ad_id', 'myself', 'ads', 'ad',
 			'dashboard', 'dashboard/released', 'dashboard/canceled', 'dashboard/closed',
 			'dashboard/released/buyer', 'dashboard/canceled/buyer', 'dashboard/closed/buyer',
 			'dashboard/released/seller', 'dashboard/canceled/seller', 'dashboard/closed/seller',
 			'wallet-send', 'wallet', 'contact_info'
 			]
 		};
+
 		if(methods.onlineAds.indexOf(method) !== -1) {
 			return onlineAdsMethod(method, params, ad_id, callback);
 		}
@@ -116,15 +118,15 @@ function LBCClient(key, secret, otp) {
 	/**
 	 * This method returns a signature for a request as a Base64-encoded string
 	 * @param  {String}  path    The relative URL path for the request
-	 * @param  {Object}  request The POST body
+	 * @param  {Object}  params The POST body
 	 * @param  {Integer} nonce   A unique, incrementing integer
 	 * @return {String}          The request signature
 	 */
 	function getMessageSignature(path, params, nonce) {
-		var postParameters	= querystring.stringify(params);
-		var path = '/api' + path + '/';
-		var message = nonce + config.key + path + postParameters;
-		var auth_hash = crypto.createHmac("sha256", config.secret).update(message).digest('hex').toUpperCase();
+		let postParameters = querystring.stringify(params);
+		path = '/api' + path + '/';
+		let message = nonce + config.key + path + postParameters;
+		let auth_hash = crypto.createHmac("sha256", config.secret).update(message).digest('hex').toUpperCase();
 		return auth_hash;
 	}
 
@@ -142,20 +144,20 @@ function LBCClient(key, secret, otp) {
     'dashboard/closed', 'dashboard/released/buyer', 'dashboard/canceled/buyer',
     'dashboard/closed/buyer', 'dashboard/released/seller', 'dashboard/canceled/seller',
     'dashboard/closed/seller', 'wallet', 'contact_info'];
-    var posts = [ 'ad-get/ad_id', 'myself', 'ads',
+    var posts = [ 'ad-get/ad_id', 'myself', 'ads', 'ad',
     'wallet-send', 'wallet-balance', 'wallet-addr'];
 
     if (posts.indexOf(method) !== -1) {
 
-			var options = {
+			let options = {
 				url: url + '/',
 				headers: headers,
 				form: params,
 			};
 
-			var req = request.post(options, function(error, response, body) {
+			let req = request.post(options, function(error, response, body) {
 				if(typeof callback === 'function') {
-					var data;
+					let data;
 
 					if(error) {
 						callback.call(self, new Error('Error in server response: ' + JSON.stringify(error)), null);
@@ -219,9 +221,15 @@ function LBCClient(key, secret, otp) {
 		}
 	}
 
-	self.api			= api;
+	self.api = api;
 	self.publicMethod	= publicMethod;
-	self.privateMethod	= privateMethod;
+	self.privateMethod = privateMethod;
+}
+
+function fixedEncodeURIComponent(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+    return '%' + c.charCodeAt(0).toString(16);
+  });
 }
 
 module.exports = LBCClient;

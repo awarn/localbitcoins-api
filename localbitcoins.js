@@ -123,6 +123,11 @@ function LBCClient(key, secret, otp) {
 	 * @return {String}          The request signature
 	 */
 	function getMessageSignature(path, params, nonce) {
+		if (params && params.msg) {
+			params.msg = params.msg.replace(/[!'()*]/g, function(c) {
+				return '%' + c.charCodeAt(0).toString(16);
+			});
+		}
 		let postParameters = querystring.stringify(params);
 		path = '/api' + path + '/';
 		let message = nonce + config.key + path + postParameters;
@@ -224,12 +229,6 @@ function LBCClient(key, secret, otp) {
 	self.api = api;
 	self.publicMethod	= publicMethod;
 	self.privateMethod = privateMethod;
-}
-
-function fixedEncodeURIComponent(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-    return '%' + c.charCodeAt(0).toString(16);
-  });
 }
 
 module.exports = LBCClient;

@@ -23,7 +23,7 @@ function LBCClient(key, secret, otp) {
 	 * @return {Object}            The request object
 	 */
 	function api(method, ad_id, params, callback) {
-		nonce = new Date() * 5000;
+		nonce = new Date() * 10000;
 		
 		let methods = {
 			onlineAds: ['buy-bitcoins-online', 'sell-bitcoins-online'],

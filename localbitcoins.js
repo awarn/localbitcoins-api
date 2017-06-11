@@ -4,7 +4,7 @@ const querystring = require('querystring');
 
 
 function LBCClient(key, secret, otp) {
-	let nonce = new Date() * 1000;
+	let nonce = new Date() * 100000;
 	var self = this;
 
 	var config = {
@@ -23,8 +23,8 @@ function LBCClient(key, secret, otp) {
 	 * @return {Object}            The request object
 	 */
 	function api(method, ad_id, params, callback) {
-		nonce = new Date() * 10000;
-		
+		nonce = new Date() * 100000;
+
 		let methods = {
 			onlineAds: ['buy-bitcoins-online', 'sell-bitcoins-online'],
 			public: ['countrycodes'],
@@ -118,7 +118,7 @@ function LBCClient(key, secret, otp) {
 	/**
 	 * This method returns a signature for a request as a Base64-encoded string
 	 * @param  {String}  path    The relative URL path for the request
-	 * @param  {Object}  params The POST body
+	 * @param  {Object}  params  The POST body
 	 * @param  {Integer} nonce   A unique, incrementing integer
 	 * @return {String}          The request signature
 	 */
